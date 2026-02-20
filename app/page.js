@@ -14,6 +14,27 @@ export default function HomePage() {
   const dragRef = useRef({ down: false, startX: 0, startLeft: 0, pid: null });
   const [svcActive, setSvcActive] = useState(1);
 
+  const navRef = useRef(null);
+  const topRef = useRef(null);
+  const servicesRef = useRef(null);
+  const blogsRef = useRef(null);
+  const contactRef = useRef(null);
+
+  const getNavH = () => {
+    const n = navRef.current;
+    if (!n) return 86;
+    const h = Math.round(n.getBoundingClientRect().height);
+    return h || 86;
+  };
+
+  const scrollToRef = (ref) => {
+    const el = ref?.current;
+    if (!el) return;
+    const navH = getNavH();
+    const y = el.getBoundingClientRect().top + window.scrollY - navH - 10;
+    window.scrollTo({ top: Math.max(0, y), behavior: "smooth" });
+  };
+
   const slides = useMemo(
     () => [
       {
@@ -82,6 +103,19 @@ export default function HomePage() {
   useEffect(() => {
     const t = setTimeout(() => setLoaded(true), 60);
     return () => clearTimeout(t);
+  }, []);
+
+  useEffect(() => {
+    const n = navRef.current;
+    if (!n) return;
+
+    const onScroll = () => {
+      n.classList.toggle("isSolid", window.scrollY > 40);
+    };
+
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   useEffect(() => {
@@ -154,7 +188,7 @@ export default function HomePage() {
 
     try {
       scroller.setPointerCapture(e.pointerId);
-    } catch { }
+    } catch {}
 
     scroller.classList.add("isDragging");
   };
@@ -179,14 +213,21 @@ export default function HomePage() {
 
   return (
     <>
-      <main className={`page ${loaded ? "loaded" : ""}`}>
+      <main ref={topRef} className={`page ${loaded ? "loaded" : ""}`}>
         <section className="hero">
           <div className="heroBg" />
           <div className="heroOverlay" />
 
-          <header className="nav">
+          <header ref={navRef} className="nav">
             <div className="navLeft">
-              <a className="brand" href="#">
+              <a
+                className="brand"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  scrollToRef(topRef);
+                }}
+              >
                 <span className="brandMark">
                   <img src="/logo-1.png" alt="logo" />
                 </span>
@@ -194,10 +235,42 @@ export default function HomePage() {
               </a>
 
               <nav className="navLinks">
-                <a href="#">Home</a>
-                <a href="#">Service</a>
-                <a href="#">Blog</a>
-                <a href="#">Contact Us</a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToRef(topRef);
+                  }}
+                >
+                  Home
+                </a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToRef(servicesRef);
+                  }}
+                >
+                  Service
+                </a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToRef(blogsRef);
+                  }}
+                >
+                  Blog
+                </a>
+                <a
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    scrollToRef(contactRef);
+                  }}
+                >
+                  Contact Us
+                </a>
               </nav>
             </div>
 
@@ -211,7 +284,12 @@ export default function HomePage() {
                 <span className="cartBadge">0</span>
               </button>
 
-              <button className="ctaBtn">
+              <button
+                className="ctaBtn"
+                onClick={() => {
+                  scrollToRef(servicesRef);
+                }}
+              >
                 <span className="ctaText">Recent Work</span>
                 <span className="ctaArrow">→</span>
               </button>
@@ -237,12 +315,22 @@ export default function HomePage() {
                   <p className="heroDesc">{s.desc}</p>
 
                   <div className="heroActions">
-                    <button className="primaryBtn">
+                    <button
+                      className="primaryBtn"
+                      onClick={() => {
+                        scrollToRef(servicesRef);
+                      }}
+                    >
                       <span>{s.primary}</span>
                       <span className="btnArrowBox">→</span>
                     </button>
 
-                    <button className="outlineBtn">
+                    <button
+                      className="outlineBtn"
+                      onClick={() => {
+                        scrollToRef(contactRef);
+                      }}
+                    >
                       <span>{s.secondary}</span>
                       <span className="btnArrowBox">→</span>
                     </button>
@@ -320,7 +408,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="svc2">
+        <section ref={servicesRef} className="svc2">
           <div className="svc2Head">
             <div className="svc2HeadLeft">
               <h2 className="svc2Title">
@@ -354,7 +442,13 @@ export default function HomePage() {
                 <div className="svc2Body">
                   <h3 className="svc2H3">{x.title}</h3>
                   <p className="svc2P">{x.desc}</p>
-                  <button className="svc2ArrowBtn" aria-label="Open">
+                  <button
+                    className="svc2ArrowBtn"
+                    aria-label="Open"
+                    onClick={() => {
+                      scrollToRef(contactRef);
+                    }}
+                  >
                     →
                   </button>
                 </div>
@@ -362,20 +456,17 @@ export default function HomePage() {
             ))}
           </div>
         </section>
+
         <section className="sig">
           <div className="sigInner">
             <div className="sigGlow" />
-
             <p className="sigQuote">
-              “We Approach Experts To Great Value For Your Business And Best Solutions For
-              Developing Business”
+              “We Approach Experts To Great Value For Your Business And Best Solutions For Developing Business”
             </p>
 
             <div className="sigRow">
               <img className="sigImg" src="/sig2.png" alt="Signature" />
-
               <div className="sigDivider" />
-
               <div className="sigMeta">
                 <div className="sigName">Jason Mathew</div>
                 <div className="sigRole">CEO of Vanguard Group</div>
@@ -383,7 +474,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <section className="freshBlogs">
+
+        <section ref={blogsRef} className="freshBlogs">
           <div className="freshBlogsInner">
             <div className="freshBlogsHead">
               <div>
@@ -424,6 +516,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+
         <section className="svcGrid">
           <div className="svcGridInner">
             <div className="svcGridTop">
@@ -436,9 +529,7 @@ export default function HomePage() {
                 <p>
                   For most of our clients, we meet them when the worst thing that ever could happen to them has happened.
                 </p>
-                <p>
-                  We know that they want more than an attorney. They want someone who will listen attentively.
-                </p>
+                <p>We know that they want more than an attorney. They want someone who will listen attentively.</p>
 
                 <a className="svcGridBtn" href="#">
                   <span>All Service</span>
@@ -486,7 +577,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-        <footer className="vFooter">
+
+        <footer ref={contactRef} className="vFooter">
           <div className="vFooterInner">
             <div className="vFooterTop">
               <div className="vFooterBrand">
@@ -552,7 +644,6 @@ export default function HomePage() {
             </div>
           </div>
         </footer>
-
       </main>
     </>
   );
